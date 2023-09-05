@@ -5,3 +5,14 @@ DeepPoseX is an innovative research project dedicated to advancing the field of 
 - [Mohammed-Rahman-sherif](https://github.com/Mohammed-Rahman-sherif)
 
 - [Ashshak Sharifdeen](https://github.com/ashshaksharifdeen)
+
+
+## Training Results
+| Methods   | epoch |  accuracy |loss |mean_absolute_error |val_accuracy |val_loss |val_mean_absolute_error |Status |
+| ------------- | ------------- |------------- |------------- |------------- |------------- |------------- |------------- |------------- |
+| Content Cell  | Content Cell  | Content Cell  |Content Cell  |Content Cell  |Content Cell  |Content Cell  |Content Cell  |
+| Content Cell  | Content Cell  |Content Cell  |Content Cell |Content Cell  |Content Cell  |Content Cell  |Content Cell  |
+
+
+
+
