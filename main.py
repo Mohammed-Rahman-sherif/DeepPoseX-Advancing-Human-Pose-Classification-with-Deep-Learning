@@ -43,8 +43,9 @@ PROJECTION_DIM = 128
 NUM_HEADS = 8
 NUM_LAYERS = 8
 
+dataset = cd.UCF50dataset(dataset_dir='E://Pose_estimization//UCF50',sequence_len=20,classes_list=["WalkingWithDog", "TaiChi", "Swing", "HorseRace"])
 # Create the dataset.
-features, labels, video_files_paths = cd.UCF50dataset.create_dataset()
+features, labels, video_files_paths = dataset.create_dataset()
 one_hot_encoded_labels = to_categorical(labels)
 # Split the Data into Train ( 75% ) and Test Set ( 25% ).
 features_train, features_test, labels_train, labels_test = train_test_split(features, one_hot_encoded_labels, test_size = 0.25, shuffle = True, random_state = seed_constant)
