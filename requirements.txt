@@ -1,0 +1,10 @@
+cv2
+random
+numpy
+tensorflow
+matplotlib
+sklearn
+os
+datetime
+moviepy
+-e .
