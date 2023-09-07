@@ -1,5 +1,5 @@
 import create_data as cd
-import model as md
+from model import ConvViVIT
 import matplotlib.pyplot as plt
 
 import tensorflow as tf
@@ -12,6 +12,7 @@ from keras.layers import TimeDistributed
 from keras.layers import Bidirectional
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.callbacks import TensorBoard
 import numpy as np
 import random
 
@@ -43,7 +44,7 @@ PROJECTION_DIM = 128
 NUM_HEADS = 8
 NUM_LAYERS = 8
 
-dataset = cd.UCF50dataset(dataset_dir='E://Pose_estimization//UCF50',sequence_len=20,classes_list=["WalkingWithDog", "TaiChi", "Swing", "HorseRace"])
+dataset = cd.UCF50dataset(dataset_dir ='E:/Pose_estimization/UCF50/',sequence_len=20,classes_list=["WalkingWithDog", "TaiChi", "Swing", "HorseRace"])
 # Create the dataset.
 features, labels, video_files_paths = dataset.create_dataset()
 one_hot_encoded_labels = to_categorical(labels)
@@ -69,15 +70,22 @@ def run_experiment(model):
         ],
     )
     #define where the model wants to save
-    checkpoint_filepath = 'Models/vitbidirection_model_weights.h5'
-    csv_logger_path = 'Logger/LogAdam5.csv'
+    checkpoint_filepath = 'E:/Pose_estimization/Models/vitbidirection_model_weights.h5'
+    csv_logger_path = 'Logger/LogAdam6.csv'
     checkpoint_callback = [keras.callbacks.CSVLogger(csv_logger_path, separator=',', append=True),
+    
     keras.callbacks.ModelCheckpoint(
         checkpoint_filepath,
         monitor="val_accuracy",
         save_best_only=True,
         save_weights_only=True,
-    )]
+    ),TensorBoard(log_dir='Logger/',
+                         histogram_freq=1,
+                         write_graph=True,
+                         write_images=True,
+                         update_freq='epoch',
+                         profile_batch=2,
+                         embeddings_freq=1)]
 
     history = model.fit(
         x=features_train,
@@ -112,5 +120,6 @@ def run_experiment(model):
     #print(f"Test top 5 accuracy: {round(top_5_accuracy * 100, 2)}%")
 
     return history
-
-
+con_vivit = ConvViVIT()
+vit_classifier = con_vivit.build_model()
+history = run_experiment(vit_classifier)

@@ -47,7 +47,7 @@ class UCF50dataset:
             break
 
         # Resize the Frame to fixed height and width.
-        resized_frame = cv2.resize(frame, (self.img_height,self.img_width))
+        resized_frame = cv2.resize(frame, (self.image_height,self.image_width))
 
         # Normalize the resized frame by dividing it with 255 so that each pixel value then lies between 0 and 1
         normalized_frame = resized_frame / 255
@@ -76,7 +76,7 @@ class UCF50dataset:
     video_files_paths = []
 
     # Iterating through all the classes mentioned in the classes list
-    for class_index, class_name in enumerate(self.dataset_dir):
+    for class_index, class_name in enumerate(self.classes_list):
 
         # Display the name of the class whose data is being extracted.
         print(f'Extracting Data of Class: {class_name}')
