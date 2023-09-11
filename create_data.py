@@ -1,6 +1,17 @@
 import os
 import numpy as np
 import cv2
+from Augment import augmentors as va
+from PIL import Image, ImageSequence
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.utils import to_categorical
+import random
+import tensorflow as tf
+
+seed_constant = 27
+np.random.seed(seed_constant)
+random.seed(seed_constant)
+tf.random.set_seed(seed_constant)
 
 
 class UCF50dataset:
@@ -23,7 +34,8 @@ class UCF50dataset:
 
     # Declare a list to store video frames.
     frames_list = []
-
+    nm_frames_list =[]
+    
     # Read the Video File using the VideoCapture object.
     video_reader = cv2.VideoCapture(video_path)
 
@@ -49,17 +61,70 @@ class UCF50dataset:
         # Resize the Frame to fixed height and width.
         resized_frame = cv2.resize(frame, (self.image_height,self.image_width))
 
-        # Normalize the resized frame by dividing it with 255 so that each pixel value then lies between 0 and 1
-        normalized_frame = resized_frame / 255
-
-        # Append the normalized frame into the frames list
-        frames_list.append(normalized_frame)
-
+       
+        
+        frames_list.append(resized_frame)
     # Release the VideoCapture object.
     video_reader.release()
-
+    
     # Return the frames list.
-    return frames_list   
+    return frames_list
+  
+  def augmentation(self,data,labels):
+
+         augmented_frame = []
+         augmented_labels= []
+
+         for frame,label in zip(data,labels):
+             
+            
+            #create Augmentation for set of frames
+            sometimes = lambda aug: va.Sometimes(1,aug)
+            seq1 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
+            sometimes(va.HorizontalFlip()),
+                      va.RandomRotate(degrees=10),
+            
+                       # horizontally flip the video with 100% probability
+])
+            aug1 = seq1(frame)
+            if len(aug1) == self.sequence_len:
+                augmented_frame.append(frame)
+                augmented_frame.append(aug1)
+                augmented_labels.append(label)
+            #save new frames to new folder
+            seq2 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
+            sometimes(va.VerticalFlip()),
+                      va.RandomRotate(degrees=45),
+            
+                       # horizontally flip the video with 100% probability
+])
+            aug2 = seq2(frame)
+            if len(aug1) == self.sequence_len:
+                augmented_frame.append(aug2)
+                augmented_labels.append(label)
+
+            seq3 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
+            sometimes(va.ElasticTransformation()),
+                      va.RandomRotate(degrees=90),
+            
+                       # horizontally flip the video with 100% probability
+])
+            aug3 = seq3(frame)
+            if len(aug1) == self.sequence_len:
+                augmented_frame.append(aug3)
+                augmented_labels.append(label)
+            #save to a location
+         augmented_labels = np.array(augmented_labels)
+         return augmented_frame,augmented_labels                     
+  def normalize(self,data):
+        frames_li = []
+        for x in data:
+              sample_frame=[]
+              for frame in x:
+                  normalize = frame/255
+                  sample_frame.append(normalize)
+              frames_li.append(sample_frame)  
+        return frames_li          
 
   def create_dataset(self):
     '''
@@ -90,6 +155,8 @@ class UCF50dataset:
             # Get the complete video path.
             video_file_path = os.path.join(self.dataset_dir, class_name, file_name)
 
+            #augment the data and give different path for train and test
+
             # Extract the frames of the video file.
             frames = self.frames_extraction(video_file_path)
 
@@ -102,9 +169,9 @@ class UCF50dataset:
                 labels.append(class_index)
                 video_files_paths.append(video_file_path)
 
-    # Converting the list to numpy arrays
-    features = np.asarray(features)
+    
     labels = np.array(labels)
-
+    one_hot_encoded_labels = to_categorical(labels)
+    features_train, features_test, labels_train, labels_test = train_test_split(features, one_hot_encoded_labels, test_size = 0.25, shuffle = True, random_state = seed_constant)
     # Return the frames, class index, and video file path.
-    return features, labels, video_files_paths
+    return features_train, features_test, labels_train, labels_test
