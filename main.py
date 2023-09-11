@@ -16,10 +16,7 @@ from tensorflow.keras.callbacks import TensorBoard
 import numpy as np
 import random
 
-seed_constant = 27
-np.random.seed(seed_constant)
-random.seed(seed_constant)
-tf.random.set_seed(seed_constant)
+
 # DATA
 
 BATCH_SIZE = 8
@@ -45,13 +42,13 @@ NUM_HEADS = 8
 NUM_LAYERS = 8
 
 dataset = cd.UCF50dataset(dataset_dir ='E:/Pose_estimization/UCF50/',sequence_len=20,classes_list=["WalkingWithDog", "TaiChi", "Swing", "HorseRace"])
-# Create the dataset.
-features, labels, video_files_paths = dataset.create_dataset()
-one_hot_encoded_labels = to_categorical(labels)
 # Split the Data into Train ( 75% ) and Test Set ( 25% ).
-features_train, features_test, labels_train, labels_test = train_test_split(features, one_hot_encoded_labels, test_size = 0.25, shuffle = True, random_state = seed_constant)
+features_train, features_test, labels_train, labels_test = dataset.create_dataset()
+feature_train,labels_train = dataset.augmentation(features_train,labels_train)
+feature_train = dataset.normalize(feature_train)
+features_test = dataset.normalize(features_test)
 
-def run_experiment(model):
+def run_experiment(model,plots_path,method):
     optimizer = tf.keras.optimizers.Adam(
         learning_rate=LEARNING_RATE
     )
@@ -71,7 +68,7 @@ def run_experiment(model):
     )
     #define where the model wants to save
     checkpoint_filepath = 'E:/Pose_estimization/Models/vitbidirection_model_weights.h5'
-    csv_logger_path = 'Logger/LogAdam6.csv'
+    csv_logger_path = f'Logger/{method}.csv'
     checkpoint_callback = [keras.callbacks.CSVLogger(csv_logger_path, separator=',', append=True),
     
     keras.callbacks.ModelCheckpoint(
@@ -114,12 +111,16 @@ def run_experiment(model):
     plt.legend()
 
     plt.show()
+    plt.savefig(f'{plots_path}/{method}.pdf')
     #model.load_weights(checkpoint_filepath)
     #_, accuracy, top_5_accuracy = model.evaluate(features_test,labels_test)
     #print(f"Test accuracy: {round(accuracy * 100, 2)}%")
     #print(f"Test top 5 accuracy: {round(top_5_accuracy * 100, 2)}%")
 
     return history
-con_vivit = ConvViVIT()
-vit_classifier = con_vivit.build_model()
-history = run_experiment(vit_classifier)
+
+
+if __name__ == '__main__':    
+        con_vivit = ConvViVIT()
+        vit_classifier = con_vivit.build_model()
+        history = run_experiment(vit_classifier,plots_path='plots/',method='Test1')
