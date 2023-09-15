@@ -23,7 +23,7 @@ class UCF50dataset:
      self.image_width = image_width
 
 
-  def frames_extraction(self,video_path):
+  def frames_extraction(self,video_path,normalize):
     '''
     This function will extract the required frames from a video after resizing and normalizing them.
     Args:
@@ -61,72 +61,138 @@ class UCF50dataset:
         # Resize the Frame to fixed height and width.
         resized_frame = cv2.resize(frame, (self.image_height,self.image_width))
 
-       
-        
-        frames_list.append(resized_frame)
+        if normalize==True:
+               normalize_frame = resized_frame/255
+               nm_frames_list.append(normalize_frame)      
+        else:
+              frames_list.append(resized_frame)
     # Release the VideoCapture object.
     video_reader.release()
     
     # Return the frames list.
-    return frames_list
+    if normalize==True:
+        return nm_frames_list
+    else:
+        return frames_list
+    
   
-  def augmentation(self,data,labels):
+  def augmentation(self,data,labels,dir):
 
          augmented_frame = []
          augmented_labels= []
-
-         for frame,label in zip(data,labels):
-             
-            
-            #create Augmentation for set of frames
-            sometimes = lambda aug: va.Sometimes(1,aug)
-            seq1 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
-            sometimes(va.HorizontalFlip()),
-                      va.RandomRotate(degrees=10),
-            
-                       # horizontally flip the video with 100% probability
-])
-            aug1 = seq1(frame)
-            if len(aug1) == self.sequence_len:
-                augmented_frame.append(frame)
-                augmented_frame.append(aug1)
-                augmented_labels.append(label)
-            #save new frames to new folder
-            seq2 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
+         function_list = []
+         index =0
+         
+         sometimes = lambda aug: va.Sometimes(1,aug)
+         seq1 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
+         sometimes(va.HorizontalFlip()),
+                      va.RandomRotate(degrees=10)])
+         seq2 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
             sometimes(va.VerticalFlip()),
-                      va.RandomRotate(degrees=45),
+                      va.RandomRotate(degrees=45),])
             
                        # horizontally flip the video with 100% probability
-])
-            aug2 = seq2(frame)
-            if len(aug1) == self.sequence_len:
-                augmented_frame.append(aug2)
-                augmented_labels.append(label)
-
-            seq3 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
+         seq3 = va.Sequential([ # randomly rotates the video with a degree randomly choosen from [-10, 10]  
             sometimes(va.ElasticTransformation()),
                       va.RandomRotate(degrees=90),
             
                        # horizontally flip the video with 100% probability
-])
-            aug3 = seq3(frame)
-            if len(aug1) == self.sequence_len:
-                augmented_frame.append(aug3)
-                augmented_labels.append(label)
+])       
+         
+
+            
+         for frames,label in zip(data,labels):
+            
+            #convert the label into category
+            cat_label = np.argmax(label,axis=0)
+            #save the first frame in the directory
+          
+            frame = np.array(frames)
+            #augmented_frame.append(frame)
+            self.save_augmented_frames(frame=frame,label=cat_label,save_dir=dir,aug_name=index)
+            augmented_labels.append(label)
+            index+=1
+           
+           
+            augmented_video_frames = []
+            #augment each image
+            for frame in frames:  
+              aug1 = seq1(frame)  
+              #aug1 = np.array(aug1)
+              augmented_video_frames.append(aug1)
+              
+            augmented_video_frames= np.array(augmented_video_frames)
+            augmented_labels.append(label)
+            index+=1                  
+            self.save_augmented_frames(frame=augmented_video_frames,label=cat_label,save_dir=dir,aug_name=index)
+            augmented_frame.append(augmented_video_frames)
+
+            augmented_video_frames = []
+            #augment each image
+            for frame in frames:  
+              aug1 = seq2(frame)  
+              #aug1 = np.array(aug1)
+              augmented_video_frames.append(aug1)
+              
+            augmented_video_frames= np.array(augmented_video_frames)
+            augmented_labels.append(label)
+            index+=1                  
+            self.save_augmented_frames(frame=augmented_video_frames,label=cat_label,save_dir=dir,aug_name=index)
+            augmented_frame.append(augmented_video_frames) 
+
+            '''augmented_video_frames = []
+            #augment each image
+            for frame in frames:  
+              aug1 = seq3(frame)  
+              #aug1 = np.array(aug1)
+              augmented_video_frames.append(aug1)
+              
+            augmented_video_frames= np.array(augmented_video_frames)
+            augmented_labels.append(label)
+            index+=1                  
+            self.save_augmented_frames(frame=augmented_video_frames,label=label,save_dir=dir,aug_name=index)
+            augmented_frame.append(augmented_video_frames)'''   
+              
+            #save new frames to new folder
+            
             #save to a location
          augmented_labels = np.array(augmented_labels)
-         return augmented_frame,augmented_labels                     
+         #create fuction to load image from directory
+         #augmented_frame = tf.convert_to_tensor(augmented_frame)
+         return augmented_labels                     
   def normalize(self,data):
+        #print("shape of data:",data.shape)
         frames_li = []
         for x in data:
               sample_frame=[]
               for frame in x:
-                  normalize = frame/255
-                  sample_frame.append(normalize)
+                  frame=(frame/255.0).astype(np.uint8)
+                  sample_frame.append(frame)
               frames_li.append(sample_frame)  
-        return frames_li          
+        return np.array(frames_li)          
 
-  def create_dataset(self):
+  def my_data_generator_function(self,data):
+      for features in data:
+            yield (features)
+
+  def save_augmented_frames(self,frame,label,save_dir,aug_name):
+      label_dir = os.path.join(save_dir,str(label))
+      os.makedirs(label_dir,exist_ok=True)
+      filename =   f"{label}_{aug_name}.avi"
+      filepath = os.path.join(label_dir,filename)
+      print(frame.shape)
+      frame_width, frame_height = frame.shape[2],frame.shape[1]
+      # Define the codec and create a VideoWriter object for each frame
+      fourcc = cv2.VideoWriter_fourcc('M', 'J', 'P', 'G')
+      out= cv2.VideoWriter(filepath,fourcc,30,(frame_width, frame_height),isColor=True)
+      for img in frame:
+        out.write(img)  # Write each frame to the video
+
+      out.release()       
+      
+            
+  
+  def create_dataset(self,normalize):
     '''
     This function will extract the data of the selected classes and create the required dataset.
     Returns:
@@ -158,7 +224,7 @@ class UCF50dataset:
             #augment the data and give different path for train and test
 
             # Extract the frames of the video file.
-            frames = self.frames_extraction(video_file_path)
+            frames = self.frames_extraction(video_file_path,normalize)
 
             # Check if the extracted frames are equal to the SEQUENCE_LENGTH specified above.
             # So ignore the vides having frames less than the SEQUENCE_LENGTH.
@@ -174,4 +240,10 @@ class UCF50dataset:
     one_hot_encoded_labels = to_categorical(labels)
     features_train, features_test, labels_train, labels_test = train_test_split(features, one_hot_encoded_labels, test_size = 0.25, shuffle = True, random_state = seed_constant)
     # Return the frames, class index, and video file path.
-    return features_train, features_test, labels_train, labels_test
+    #accessing the normalize data for training data
+    if normalize==True:
+          features=np.array(features)
+          reshaped_features = features.reshape(-1,20,64,64,3)
+          return reshaped_features
+    else:    
+        return features_train, features_test, labels_train, labels_test
