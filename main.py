@@ -42,12 +42,21 @@ NUM_HEADS = 8
 NUM_LAYERS = 8
 
 dataset = cd.UCF50dataset(dataset_dir ='E:/Pose_estimization/UCF50/',sequence_len=20,classes_list=["WalkingWithDog", "TaiChi", "Swing", "HorseRace"])
+aug_data = cd.UCF50dataset(dataset_dir ='E:/Deepox/aug_data/',sequence_len=20,classes_list=[ '0','1','2','3'])
 # Split the Data into Train ( 75% ) and Test Set ( 25% ).
-features_train, features_test, labels_train, labels_test = dataset.create_dataset()
-feature_train,labels_train = dataset.augmentation(features_train,labels_train)
-feature_train = dataset.normalize(feature_train)
+features_train, features_test, labels_train, labels_test = dataset.create_dataset(normalize=False)
+labels_train = dataset.augmentation(features_train,labels_train,dir='aug_data/')
+#accesing the Augmented data and normalize it 
+feature_train = aug_data.create_dataset(normalize=True)
 features_test = dataset.normalize(features_test)
-
+"""data =data = tf.data.Dataset.from_generator(
+    generator=dataset.my_data_generator_function,  # Define this function to yield batches
+    args=(feature_train),
+    output_signature=(
+        tf.TensorSpec(shape=(None,20,64, 64, 3), dtype=tf.float32),  # Input frames 
+    )
+)
+data = data.batch(BATCH_SIZE).shuffle(buffer_size=1000).repeat()"""
 def run_experiment(model,plots_path,method):
     optimizer = tf.keras.optimizers.Adam(
         learning_rate=LEARNING_RATE
@@ -85,13 +94,17 @@ def run_experiment(model,plots_path,method):
                          embeddings_freq=1)]
 
     history = model.fit(
-        x=features_train,
+        x=feature_train,
         y=labels_train,
         batch_size=BATCH_SIZE,
         epochs=EPOCHS,
         validation_split=0.1,
         callbacks=[checkpoint_callback]
     )
+    model.load_weights(checkpoint_filepath)
+    _, accuracy, top_5_accuracy = model.evaluate(features_test,labels_test)
+    print(f"Test accuracy: {round(accuracy * 100, 2)}%")
+    print(f"Test top 5 accuracy: {round(top_5_accuracy * 100, 2)}%")
 
     # Create a single graph for both Loss and Mean Absolute Error with different legends
     plt.figure(figsize=(8, 6))
