@@ -34,7 +34,7 @@ class UCF50dataset:
 
     # Declare a list to store video frames.
     frames_list = []
-    nm_frames_list =[]
+    nm_frames_list = []
     
     # Read the Video File using the VideoCapture object.
     video_reader = cv2.VideoCapture(video_path)

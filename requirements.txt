@@ -1,10 +1,8 @@
-cv2
-random
-numpy
-tensorflow
+opencv-python
+numpy==1.19.5
+tensorflow-gpu==2.6.0
 matplotlib
-sklearn
-os
-datetime
+scikit-learn
 moviepy
+protobuf==3.20.0
 -e .

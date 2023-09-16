@@ -1,0 +1,35 @@
+--> To install tenforflow-GPU
+conda install tensorflow-gpu=2.6.0
+
+--> If not need for stable TF version
+conda install tf-nightly
+
+--> To install CUDA files with conda
+conda install tensorflow-gpu
+conda install -c anaconda cudnn
+
+--> To install only cudatoolkit
+conda install -c conda-forge cudatoolkit=11.2
+
+--> To export packages from old env to new env
+conda list --name my_existing_environment --export > package_list.txt
+
+----------------------------
+package_list.txt
+----------------------------
+cudatoolkit=11.3.1
+cudnn=8.2.1
+----------------------------
+
+--> To change the CUDA Path
+setx CUDA_PATH "C:\Users\smart\Anaconda3\pkgs\cudatoolkit-11.2.2-h933977f_10\Library"
+setx CUDA_HOME "%CUDA_PATH%"
+
+--> To check the CUDA Path of the current env
+echo %CUDA_PATH%
+
+--> To check CUDA version
+nvcc --version
+
+--> To check the GPU and CUDA config
+print(tf.config.list_physical_devices('GPU'))
