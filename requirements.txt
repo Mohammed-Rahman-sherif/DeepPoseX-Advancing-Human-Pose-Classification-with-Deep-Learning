@@ -1,8 +1,7 @@
-opencv-python
-numpy==1.19.5
-tensorflow-gpu==2.6.0
-matplotlib
-scikit-learn
-moviepy
-protobuf==3.20.0
+opencv-python==4.8.0.76
+numpy==1.25.2
+tensorflow-gpu==2.8.0
+matplotlib==3.8.0
+scikit-learn==1.3.0
+moviepy==1.0.3
 -e .

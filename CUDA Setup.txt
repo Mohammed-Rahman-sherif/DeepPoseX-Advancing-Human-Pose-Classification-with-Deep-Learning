@@ -4,7 +4,11 @@ conda install tensorflow-gpu=2.6.0
 --> If not need for stable TF version
 conda install tf-nightly
 
---> To install CUDA files with conda
+--> Best way
+Download CUDATOOLKIT from https://developer.nvidia.com/
+Download CUDNN from https://developer.nvidia.com/rdp/cudnn-download
+
+--> To install CUDA files with conda (Alternative)
 conda install tensorflow-gpu
 conda install -c anaconda cudnn
 
@@ -21,7 +25,7 @@ cudatoolkit=11.3.1
 cudnn=8.2.1
 ----------------------------
 
---> To change the CUDA Path
+--> To change the CUDA Path (ToolKit software will automatically setup env path)
 setx CUDA_PATH "C:\Users\smart\Anaconda3\pkgs\cudatoolkit-11.2.2-h933977f_10\Library"
 setx CUDA_HOME "%CUDA_PATH%"
 
@@ -32,4 +36,13 @@ echo %CUDA_PATH%
 nvcc --version
 
 --> To check the GPU and CUDA config
+print(tf.__version__)
 print(tf.config.list_physical_devices('GPU'))
+
+####################################
+CURRENT SETUP                      #
+####################################
+NVIDIA CUDATOOLKIT = 11.7          #
+CUDNN = 8.9.5                      #
+TENSORFLOW-GPU = 2.8.0             #
+####################################
