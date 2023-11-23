@@ -11,7 +11,7 @@ DeepPoseX is an innovative research project dedicated to advancing the field of 
 | Methods   | epoch |  accuracy |loss |mean_absolute_error |val_accuracy |val_loss |val_mean_absolute_error |Status |
 | ------------- | ------------- |------------- |------------- |------------- |------------- |------------- |------------- |------------- |
 | Adam Optimizer  | 65  | 0.972561  | 2.3452  | 0.0417  |0.5675  |3.74307|0.2209  | Over fitting  |
-| Content Cell  | Content Cell  |Content Cell  |Content Cell |Content Cell  |Content Cell  |Content Cell  |Content Cell  |
+
 
 
 
