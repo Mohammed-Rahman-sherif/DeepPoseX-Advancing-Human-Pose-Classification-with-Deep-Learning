@@ -70,8 +70,11 @@ def run_experiment(model,plots_path,method):
         optimizer=optimizer,
         loss=keras.losses.CategoricalCrossentropy(from_logits=False),
         metrics=[
+            #It measures the average absolute difference between the predicted and true values across all samples in the dataset.
             keras.metrics.MeanAbsoluteError(name='mean_absolute_error'),
+            #It calculates the proportion of correctly classified samples out of the total number of samples.
             keras.metrics.CategoricalAccuracy(name="accuracy"),
+            #evaluates the accuracy of the top 5 predictions made by the model compared to the true labels. 
             keras.metrics.TopKCategoricalAccuracy(5, name="top-5-accuracy"),
         ],
     )
