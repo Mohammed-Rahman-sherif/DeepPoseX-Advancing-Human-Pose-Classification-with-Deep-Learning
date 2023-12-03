@@ -46,7 +46,7 @@ aug_data = cd.UCF50dataset(dataset_dir ='E:/Deepox/aug_data/',sequence_len=20,cl
 # Split the Data into Train ( 75% ) and Test Set ( 25% ).
 features_train, features_test, labels_train, labels_test = dataset.create_dataset(normalize=False)
 labels_train = dataset.augmentation(features_train,labels_train,dir='aug_data/')
-#accesing the Augmented data and normalize it 
+#accesing the Augmented data and normalize it. To use for normalize the Train data
 feature_train = aug_data.create_dataset(normalize=True)
 features_test = dataset.normalize(features_test)
 """data =data = tf.data.Dataset.from_generator(
